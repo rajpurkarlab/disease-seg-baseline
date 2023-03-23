@@ -1,8 +1,8 @@
 import argparse
 import sys
 
-from .models.run_biovil import plot_phrase_grounding as ppgb
-from .models.run_chexzero import plot_phrase_grounding as ppgc
+from models.run_biovil import plot_phrase_grounding as ppgb
+from models.run_chexzero import plot_phrase_grounding as ppgc
 
 def parse_clip_use_case_args():
     """Parse command line arguments."""
@@ -14,21 +14,13 @@ def parse_clip_use_case_args():
         help="name of the model to use",
     )
     parser.add_argument(
-        "evaluation_type",
+        "img_path",
         type=str,
-        choices=["all", "individual"],
-        help="'all' if want to evaluate on entire MS-CXR dataset, 'individual' if want to run a specific query",
-    )
-    parser.add_argument(
-        "--img_path",
-        type=str,
-        default="N/A",
         help="path to image",
     )
     parser.add_argument(
-        "--query",
+        "query",
         type=str,
-        default="N/A",
         help="NL text for segmentation",
     )
     args = parser.parse_args()
@@ -40,9 +32,9 @@ def parse_clip_use_case_args():
 def main():
     args = parse_clip_use_case_args()
     if args.model_name == "chexzero":
-        ppgc(args.img_path, args.query)
+        ppgc(args.img_path, args.query.replace("_", " "))
     elif args.model_name == "biovil":
-        ppgb(args.img_path, args.query)
+        ppgb(args.img_path, args.query.replace("_", " "))
     else:
         raise NotImplementedError(
                 f"{args.model_name} target_name is not implemented!"

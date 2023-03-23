@@ -11,7 +11,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from health_multimodal.image.data.io import load_image
+from ..image.data.io import load_image
 
 
 TypeArrayImage = Union[np.ndarray, Image.Image]

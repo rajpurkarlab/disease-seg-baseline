@@ -14,8 +14,8 @@ import torch
 import torch.nn.functional as F
 from scipy import ndimage
 
-from health_multimodal.image import ImageInferenceEngine
-from health_multimodal.text import TextInferenceEngine
+from ..image import ImageInferenceEngine
+from ..text import TextInferenceEngine
 
 
 class ImageTextInferenceEngine:

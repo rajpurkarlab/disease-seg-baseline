@@ -11,9 +11,9 @@ import torch
 import torch.nn.functional as F
 from torchvision.transforms import Compose
 
-from health_multimodal.image.data.io import load_image
-from health_multimodal.image.data.transforms import infer_resize_params
-from health_multimodal.image.model.model import ImageModel
+from .data.io import load_image
+from .data.transforms import infer_resize_params
+from .model.model import ImageModel
 
 TypeShape2D = Tuple[int, int]
 

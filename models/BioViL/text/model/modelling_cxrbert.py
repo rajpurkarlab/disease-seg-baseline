@@ -12,7 +12,7 @@ from torch import Tensor as T
 from transformers import BertForMaskedLM
 from transformers.modeling_outputs import ModelOutput
 
-from health_multimodal.text.model.configuration_cxrbert import CXRBertConfig
+from .configuration_cxrbert import CXRBertConfig
 
 BERTTupleOutput = Tuple[T, T, T, T, T]
 
