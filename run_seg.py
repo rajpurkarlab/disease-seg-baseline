@@ -1,7 +1,8 @@
 import argparse
 import sys
 
-from .models.run_biovil import plot_phrase_grounding
+from .models.run_biovil import plot_phrase_grounding as ppgb
+from .models.run_chexzero import plot_phrase_grounding as ppgc
 
 def parse_clip_use_case_args():
     """Parse command line arguments."""
@@ -39,9 +40,9 @@ def parse_clip_use_case_args():
 def main():
     args = parse_clip_use_case_args()
     if args.model_name == "chexzero":
-        pass
+        ppgc(args.img_path, args.query)
     elif args.model_name == "biovil":
-        plot_phrase_grounding(args.img_path, args.query)
+        ppgb(args.img_path, args.query)
     else:
         raise NotImplementedError(
                 f"{args.model_name} target_name is not implemented!"
