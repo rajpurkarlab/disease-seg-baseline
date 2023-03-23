@@ -23,7 +23,7 @@ def plot_phrase_grounding(image_path: str, text_prompt: str) -> None:
         interpolation="bilinear",
     )
     plot_phrase_grounding_similarity_map(
-        image_path=image_path,
+        image_path=Path(image_path),
         similarity_map=similarity_map,
         fname="../../biovil_plot.png",
     )

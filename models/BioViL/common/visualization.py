@@ -117,4 +117,5 @@ def plot_phrase_grounding_similarity_map(image_path: Path, similarity_map: np.nd
     _plot_image(image, axis=axes[0], title="Input image")
     _plot_isolines(image, similarity_map, axis=axes[1], title="Similarity isolines")
     _plot_heatmap(image, similarity_map, figure=fig, axis=axes[2], title="Similarity heatmap")
+    print(f"\nSaving similarity map to {Path(fname)}...\n")
     plt.savefig(fname)

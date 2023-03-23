@@ -5,7 +5,7 @@ from torch import nn
 from torch.nn import functional as nnf
 from torch.nn.modules.activation import ReLU
 
-from zero_shot import load_chexzero
+from .zero_shot import load_chexzero
 
 
 def get_prompt_list(prompt):
