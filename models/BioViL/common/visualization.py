@@ -106,14 +106,14 @@ def _plot_heatmap(
         axis.set_title(title)
 
 
-def plot_phrase_grounding_similarity_map(image_path: Path, similarity_map: np.ndarray, fname: str):
+def plot_phrase_grounding_similarity_map(image_path: Path, similarity_map: np.ndarray, fname: str, text_prompt: str):
     """Plot visualization of the input image, the similarity heatmap and the heatmap isolines.
 
     :param image_path: Path to the input image.
     :param similarity_map: Phase grounding similarity map of the same size as the image.
     """
     fig, axes = plt.subplots(1, 3, figsize=(15, 6))
-    image = load_image(image_path).convert("RGB")
+    image = load_image(image_path).convert("RGB") # TODO (vramesh, 2023-3-23): Overlay with gt seg
     _plot_image(image, axis=axes[0], title="Input image")
     _plot_isolines(image, similarity_map, axis=axes[1], title="Similarity isolines")
     _plot_heatmap(image, similarity_map, figure=fig, axis=axes[2], title="Similarity heatmap")

@@ -73,7 +73,6 @@ class MultiTaskModel(nn.Module):
         self.num_tasks = num_tasks
 
         for task in range(num_tasks):
-            # TODO check if softmax not needed here.
             setattr(self, "fc_" + str(task), MLP(input_dim, output_dim=num_classes, hidden_dim=classifier_hidden_dim))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

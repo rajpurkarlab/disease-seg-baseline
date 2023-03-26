@@ -73,7 +73,6 @@ class ImageTextInferenceEngine:
         assert not self.text_inference_engine.model.training
         assert isinstance(query_text, str)
 
-        # TODO: Add checks in here regarding the text query, etc.
         image_embedding, (width, height) = self.image_inference_engine.get_projected_patch_embeddings(image_path)
         text_embedding = self.text_inference_engine.get_embeddings_from_prompt(query_text)
 
@@ -122,9 +121,6 @@ class ImageTextInferenceEngine:
         n_patches_h, n_patches_w = similarity_map.shape[0], similarity_map.shape[1]
         target_shape = 1, 1, n_patches_h, n_patches_w
         smallest_dimension = min(height, width)
-
-        # TODO:
-        # verify_resize_params(val_img_transforms, resize_size, crop_size)
 
         reshaped_similarity = similarity_map.reshape(target_shape)
         align_corners_modes = "linear", "bilinear", "bicubic", "trilinear"

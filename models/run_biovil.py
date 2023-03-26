@@ -25,5 +25,6 @@ def plot_phrase_grounding(image_path: str, text_prompt: str) -> None:
     plot_phrase_grounding_similarity_map(
         image_path=Path(image_path),
         similarity_map=similarity_map,
-        fname="../../biovil_plot.png",
+        fname="biovil_plot.png",
+        text_prompt=text_prompt
     )

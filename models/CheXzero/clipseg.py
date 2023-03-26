@@ -82,10 +82,11 @@ class CLIPDenseBase(nn.Module):
     def __init__(self, version, reduce_cond, reduce_dim, prompt, n_tokens):
         super().__init__()
 
-        # import clip
+        import clip
 
         # prec = torch.FloatTensor
-        self.clip_model, _ = load_chexzero() #clip.load(version, device='cpu', jit=False)
+        # self.clip_model, _ = load_chexzero("models/CheXzero/checkpoints/chexzero_weights/best_64_0.0001_original_16000_0.861.pt") 
+        self.clip_model, _ = clip.load(version, device='cpu', jit=False)
         self.model = self.clip_model.visual
 
         # if not None, scale conv weights such that we obtain n_tokens.

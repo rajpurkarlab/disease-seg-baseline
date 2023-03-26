@@ -1,0 +1,1 @@
+First, you must get approval for the use of [MIMIC-CXR-JPG](https://physionet.org/content/mimic-cxr-jpg/2.0.0/). With approval, you will have access to the train/test reports and the JPG images. Place just the JPG images in this folder.
