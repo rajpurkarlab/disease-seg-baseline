@@ -43,21 +43,21 @@ def main():
     evaluate(args.model_name)
 
 def evaluate(model_name):
-    json_obj = json.load(open("datasets/CheXlocalize/gt_segmentations_test.json"))
-    ID_TO_PATH = {}
-    images = json_obj["images"]
-    for image in images:
-        ID_TO_PATH[image["id"]] = image["path"]
+    # json_obj = json.load(open("datasets/MS-CXR/MS_CXR_Local_Alignment_v1.0.0.json"))
+    # ID_TO_PATH = {}
+    # images = json_obj["images"]
+    # for image in images:
+    #     ID_TO_PATH[image["id"]] = image["path"]
 
-    annotations = json_obj["annotations"]
+    # annotations = json_obj["annotations"]
 
-    for annotation in annotations:
-        image_id = annotation["image_id"]
-        query = annotation["label_text"]
-        image_path = ID_TO_PATH[image_id]
+    # for annotation in annotations:
+    #     image_id = annotation["image_id"]
+    #     query = annotation["label_text"]
+    #     image_path = ID_TO_PATH[image_id]
 
-        print(f"Running {model_name} on '{image_path}' with query '{query}'...")
-        break
+    #     print(f"Running {model_name} on '{image_path}' with query '{query}'...")
+    #     break
 
         if model_name == "chexzero":
             pass
