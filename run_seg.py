@@ -43,7 +43,7 @@ def main():
     evaluate(args.model_name)
 
 def evaluate(model_name):
-    json_obj = json.load(open("datasets/MS-CXR/MS_CXR_Local_Alignment_v1.0.0.json"))
+    json_obj = json.load(open("datasets/CheXlocalize/gt_segmentations_test.json"))
     ID_TO_PATH = {}
     images = json_obj["images"]
     for image in images:
