@@ -1,74 +1,54 @@
-import argparse
-import sys
 import json
+from matplotlib import pyplot as plt
+from pathlib import Path
+import numpy as np
+from uuid import uuid4
 
 from models.run_biovil import plot_phrase_grounding as ppgb
-from models.run_chexzero import plot_phrase_grounding as ppgc
+from models.BioViL.image.data.io import load_image
 
-def parse_clip_use_case_args():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "model_name",
-        type=str,
-        choices=["chexzero", "biovil"],
-        help="name of the model to use",
-    )
-    # parser.add_argument(
-    #     "img_path",
-    #     type=str,
-    #     help="path to image",
-    # )
-    # parser.add_argument(
-    #     "query",
-    #     type=str,
-    #     help="NL text for segmentation",
-    # )
-    args = parser.parse_args()
-    print(f"Running {sys.argv[0]} with arguments")
-    for arg in vars(args):
-        print(f"\t{arg}={getattr(args, arg)}")
-    return args
+PROMPTS = {
+    "Enlarged Cardiomediastinum": "There is an enlarged cardiomediastinum",
+    "Cardiomegaly": "There is a cardiomegaly", 
+    "Lung Lesion": "There is a lung lesion", 
+    "Airspace Opacity": "There is an airspace opacity",
+    "Edema": "There is an edema",
+    "Consolidation": "There is consolidation",
+    "Atelectasis": "There is atelectasis",
+    "Pneumothorax": "There is a pneumothorax",
+    "Pleural Effusion": "There is pleural effusion", 
+    "Support Devices": "There are support devices"
+}
 
 def main():
-    args = parse_clip_use_case_args()
-    # if args.model_name == "chexzero":
-    #     ppgc(args.img_path, args.query.replace("_", " "))
-    # elif args.model_name == "biovil":
-    #     ppgb(args.img_path, args.query.replace("_", " "))
-    # else:
-    #     raise NotImplementedError(
-    #             f"{args.model_name} target_name is not implemented!"
-    #         )
-    evaluate(args.model_name)
+    PLOT_IMAGES = False
 
-def evaluate(model_name):
     json_obj = json.load(open("datasets/CheXlocalize/gt_segmentations_test.json"))
-    ID_TO_PATH = {}
-    images = json_obj["images"]
-    for image in images:
-        ID_TO_PATH[image["id"]] = image["path"]
 
-    annotations = json_obj["annotations"]
+    for obj in json_obj:
+        filename = "datasets/CheXlocalize/CheXpert/test/" + obj.replace("_", "/", (obj.count('_')-1)) + ".jpg"
+        for query in json_obj[obj]:
+            text_prompt = PROMPTS[query]
+            heatmap = ppgb(filename, text_prompt)
+            THRESHOLD = np.nanmin(heatmap)+np.nanmax(heatmap)
+            mask = (heatmap > THRESHOLD).astype(int)
+           
+            if PLOT_IMAGES:
+                fig, axes = plt.subplots(1, 3, figsize=(15, 6))
+                image = load_image(Path(filename)).convert("RGB")
+                axes[0].imshow(image)
+                axes[0].axis('off')
+                axes[0].set_title("Input image")
 
-    for annotation in annotations:
-        image_id = annotation["image_id"]
-        query = annotation["label_text"]
-        image_path = ID_TO_PATH[image_id]
+                axes[1].imshow(mask)
+                axes[1].axis('off')
+                axes[1].set_title(f"BioViL mask: {text_prompt}")
+                plt.savefig(f"biovil_plot_{uuid4()}.png")
+            
+            
 
-        print(f"Running {model_name} on '{image_path}' with query '{query}'...")
+            break
         break
-
-        if model_name == "chexzero":
-            pass
-        elif model_name == "biovil":
-            ious = []
-
-        else:
-            raise NotImplementedError(
-                    f"{model_name} target_name is not implemented!"
-                )
-    
 
 if __name__ == "__main__":
     main()
