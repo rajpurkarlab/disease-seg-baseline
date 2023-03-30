@@ -30,3 +30,10 @@ PATH_TO_ID = {
     "Pleural Effusion": 8,
     "Support Devices": 9
 }
+
+def read_prompts(filename):
+    import pickle
+    # Read dictionary pkl file
+    with open(filename, 'rb') as fp:
+        d = pickle.load(fp)
+    return d
