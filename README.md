@@ -36,6 +36,43 @@ python3 find_prompts.py BioViL CheXlocalize MS-CXR
 
 ## Results Leaderboard
 
-| Models                   | mIoU                | Avg. DICE           |
-| ------------------------ | ------------------- | ------------------- |
-| BioViL w/o modifications | 0.04160316690371632 | 0.06266696649111267 |
+<table>
+    <thead>
+        <tr>
+            <th>Model</th>
+            <th colspan=6>mIOU by Pathology</th>
+        </tr>
+        <tr>
+            <th></th>
+            <th>Cardiomegaly</th>
+            <th>Edema</th>
+            <th>Consolidation</th>
+            <th>Atelectasis</th>
+            <th>Pneumothorax</th>
+            <th>Pleural Effusion</th>
+        </tr>
+    </thead>
+    <tbody>
+    <tr>
+            <td>BioViL w/o modifications</td>
+        </tr>
+        <tr>
+            <td>BioViL w/ hard-search prompts</td>
+            <td>0.0785</td>
+            <td>0.0519</td>
+            <td>0.0623</td>
+            <td>0.1533</td>
+            <td>0.0064</td>
+            <td>0.0724</td>
+        </tr>
+        <tr>
+            <td>(Associated Prompts)</td>
+            <td>heart size is enlarged</td>
+            <td>interstitial edema is present in the right lower lung</td>
+            <td>There is consolidation of bilateral lung bases, left more than right</td>
+            <td>probable left pleural effusion with adjacent atelectasis</td>
+            <td>there is a left chest tube and small basilar left pneumothorax</td>
+            <td>Left mild pleural effusion is unchanged, and low lung volumes persist</td>
+        </tr>
+    </tbody>
+</table>
