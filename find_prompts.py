@@ -1,12 +1,7 @@
 import json
-from matplotlib import pyplot as plt
-from pathlib import Path
-import numpy as np
-from uuid import uuid4
 import pycocotools.mask as mask_util
 import argparse
 import csv
-import pickle
 
 from models.run_biovil import plot_phrase_grounding as ppgb
 from models.BioViL.image.data.io import load_image
@@ -22,18 +17,10 @@ def parse_args():
 def main():
     args = parse_args()
 
-    PROMPTS_BY_PATH = {
-        "Enlarged Cardiomediastinum": [],
-        "Cardiomegaly": [],
-        "Lung Lesion": [],
-        "Airspace Opacity": [],
-        "Edema": [],
-        "Consolidation": [],
-        "Atelectasis": [],
-        "Pneumothorax": [],
-        "Pleural Effusion": [],
-        "Support Devices": []
-    }
+    pathologies = ["Enlarged Cardiomediastinum", "Cardiomegaly", "Lung Lesion", "Airspace Opacity", "Edema", "Consolidation", "Atelectasis", "Pneumothorax", "Pleural Effusion", "Support Devices"]
+
+    best_ious = [0]*len(pathologies)
+    best_prompts = ['']*len(pathologies)
 
     if args.model != "BioViL":
         raise NotImplementedError("Only BioViL is implemented for now")
@@ -42,39 +29,50 @@ def main():
     
     json_obj = json.load(open("datasets/CheXlocalize/gt_segmentations_val.json"))
 
-    for obj in json_obj:
-        filename = "datasets/CheXlocalize/CheXpert/val/" + obj.replace("_", "/", (obj.count('_')-1)) + ".jpg"
-        for query in json_obj[obj]:
-            annots = json_obj[obj][query]
+    tried_prompts = set()
 
-            if annots['counts'] != 'ifdl3':
-                gt_mask = mask_util.decode(annots)
+    for pathology in pathologies:
+        print(f"\n{pathology}\n")
+        if args.corpus_set == "MIMIC-CXR":
+            raise NotImplementedError("MIMIC-CXR not implemented yet")
+        elif args.corpus_set == "MS-CXR":
+            with open('datasets/MS-CXR/MS_CXR_Local_Alignment_v1.0.0.csv', newline='') as csvfile:
+                reader = csv.reader(csvfile, delimiter=',')
+                for row in reader:
+                    if row[1] == pathology:
+                        text_prompt = row[2]
 
-                best_iou = 0
-                best_prompt = ""
+                        if text_prompt in tried_prompts:
+                            continue
 
-                if args.corpus_set == "MIMIC-CXR":
-                    raise NotImplementedError("MIMIC-CXR not implemented yet")
-                elif args.corpus_set == "MS-CXR":
-                    with open('datasets/MS-CXR/MS_CXR_Local_Alignment_v1.0.0.csv', newline='') as csvfile:
-                        reader = csv.reader(csvfile, delimiter=',')
-                        for row in reader:
-                            if row[1] == query:
-                                text_prompt = row[2]
+                        tried_prompts.add(text_prompt)
+
+                        tiou = 0
+                        count = 0.0
+                         
+                        for obj in json_obj:
+                            filename = "datasets/CheXlocalize/CheXpert/val/" + obj.replace("_", "/", (obj.count('_')-1)) + ".jpg"
+
+                            annots = json_obj[obj][pathology]
+
+                            if annots['counts'] != 'ifdl3':
                                 heatmap = ppgb(filename, text_prompt)
+                                gt_mask = mask_util.decode(annots)
                                 iou, _, _ = compute_segmentation_metrics(heatmap, gt_mask)
-                                if iou > best_iou:
-                                    best_iou = iou
-                                    best_prompt = text_prompt
-                else:
-                    raise NotImplementedError("Only MIMIC-CXR and MS-CXR are implemented for now")
-                
-                PROMPTS_BY_PATH[query].append(best_prompt)
+                                tiou += iou
+                                count += 1.0
 
-    with open('prompts.pkl', 'wb') as fp:
-        pickle.dump(PROMPTS_BY_PATH, fp)
-    
-    # print(read_prompts("prompts.pkl"))
-    
+                        if tiou/count > best_ious[pathologies.index(pathology)]:
+                            best_ious[pathologies.index(pathology)] = tiou/count
+                            best_prompts[pathologies.index(pathology)] = text_prompt            
+        else:
+            raise NotImplementedError("Only MIMIC-CXR and MS-CXR are implemented for now")
+
+    f = open("results.txt", "a")
+    f.write(str(best_ious))
+    f.write("\n")
+    f.write(str(best_prompts))
+    f.close()
+        
 if __name__ == "__main__":
     main()
