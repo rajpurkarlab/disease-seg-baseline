@@ -4,4 +4,4 @@ pycocotools
 torch
 torchvision==0.14.1
 transformers
-skimage
+scikit-image
