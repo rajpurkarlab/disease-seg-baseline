@@ -57,7 +57,7 @@ python3 find_prompts.py BioViL CheXlocalize MS-CXR
             <td>BioViL w/o modifications</td>
         </tr>
         <tr>
-            <td>BioViL w/ hard-search prompts</td>
+            <td>BioViL w/ prompts hard-searched over MS-CXR</td>
             <td>0.0785</td>
             <td>0.0519</td>
             <td>0.0623</td>
