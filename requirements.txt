@@ -1,3 +1,7 @@
 pydicom
 SimpleITK
 pycocotools
+torch
+torchvision==0.14.1
+transformers
+scikit-image
