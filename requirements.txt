@@ -2,5 +2,5 @@ pydicom
 SimpleITK
 pycocotools
 torch
-torchvision
+torchvision==0.14.1
 transformers
