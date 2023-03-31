@@ -1,7 +1,6 @@
 import json
 from matplotlib import pyplot as plt
 from pathlib import Path
-import numpy as np
 from uuid import uuid4
 import pycocotools.mask as mask_util
 import argparse
@@ -79,11 +78,19 @@ def main():
                 dices_by_pathology[PATH_TO_ID[query]] += best_dice
                 numbers_by_pathology[PATH_TO_ID[query]] += 1
     
+    f = open("run_seg.txt", "a")
+
     for pathology in PROMPTS:
         print("Pathology:", pathology, "mIoU:", ious_by_pathology[PATH_TO_ID[pathology]]/numbers_by_pathology[PATH_TO_ID[pathology]], "Avg. DICE:", dices_by_pathology[PATH_TO_ID[pathology]]/numbers_by_pathology[PATH_TO_ID[pathology]])
+        f.write("Pathology: " + pathology + " mIoU: " + str(ious_by_pathology[PATH_TO_ID[pathology]]/numbers_by_pathology[PATH_TO_ID[pathology]]) + " Avg. DICE: " + str(dices_by_pathology[PATH_TO_ID[pathology]]/numbers_by_pathology[PATH_TO_ID[pathology]]) + "\n")
 
+    f.write("\n")
     print("mIoU:", sum(ious_by_pathology)/sum(numbers_by_pathology))
+    f.write("mIoU: " + str(sum(ious_by_pathology)/sum(numbers_by_pathology)) + "\n")
     print("Avg. DICE: ", sum(dices_by_pathology)/sum(numbers_by_pathology))
+    f.write("Avg. DICE: " + str(sum(dices_by_pathology)/sum(numbers_by_pathology)) + "\n")
+
+    f.close()
 
 if __name__ == "__main__":
     main()
