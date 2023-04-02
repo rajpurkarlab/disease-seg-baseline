@@ -40,85 +40,59 @@ python3 find_prompts.py BioViL CheXlocalize MS-CXR
     <thead>
         <tr>
             <th>Model</th>
-            <th colspan=10>mIoU by Pathology</th>
+            <th colspan=6>mIoU by Pathology</th>
             <th>Overall mIoU</th>
-            <th>Overall Avg. DICE</th>
         </tr>
         <tr>
             <th></th>
-            <th>Enlarged Cardiomediastinum</th>
             <th>Cardiomegaly</th>
-            <th>Lung Lesion</th>
-            <th>Airspace Opacity</th>
             <th>Edema</th>
             <th>Consolidation</th>
             <th>Atelectasis</th>
             <th>Pneumothorax</th>
             <th>Pleural Effusion</th>
-            <th>Support Devices</th>
-            <th></th>
             <th></th>
         </tr>
     </thead>
     <tbody>
     <tr>
             <td>BioViL w/o modifications</td>
-            <td>0.1088</td>
             <td>0.0628</td>
-            <td>0.0017</td>
-            <td>0.0592</td>
             <td>0.0276</td>
             <td>0.0053</td>
         <td>0.0446</td>
         <td>0.0028</td>
         <td>0.0618</td>
-        <td>0.0461</td>
-        <td>0.0423</td>
-        <td>0.0629</td>
+        <td>0.0342</td>
         </tr>
         <tr>
             <td>(Associated Prompts)</td>
-            <td>Findings suggesting enlarged cardiomediastinum</td>
             <td>Findings suggesting cardiomegaly</td>
-            <td>Findings suggesting lung lesions</td>
-            <td>Findings suggesting airspace opacities</td>
             <td>Findings suggesting an edema</td>
             <td>Findings suggesting consolidation</td>
             <td>Findings suggesting atelectasis</td>
             <td>Findings suggesting a pneumothorax</td>
             <td>Findings suggesting pleural effusion</td>
-            <td>Findings suggesting support devices</td>
-            <td></td>
             <td></td>
         </tr>
         <tr>
             <td>BioViL w/ prompts hard-searched over MS-CXR</td>
-            <td>N/A</td>
             <td><strong>0.0785</strong></td>
-            <td>N/A</td>
-            <td>N/A</td>
             <td><strong>0.0519</strong></td>
             <td><strong>0.0623</strong></td>
             <td><strong>0.1533</strong></td>
             <td><strong>0.0064</strong></td>
             <td><strong>0.0724</strong></td>
-            <td>N/A</td>
-            <td>---</td>
-            <td>---</td>
+            <td><strong>0.0708</strong></td>
         </tr>
         <tr>
             <td>(Associated Prompts)</td>
-            <td>N/A</td>
             <td>heart size is enlarged</td>
-            <td>N/A</td>
-            <td>N/A</td>
             <td>interstitial edema is present in the right lower lung</td>
             <td>There is consolidation of bilateral lung bases, left more than right</td>
             <td>probable left pleural effusion with adjacent atelectasis</td>
             <td>there is a left chest tube and small basilar left pneumothorax</td>
             <td>Left mild pleural effusion is unchanged, and low lung volumes persist</td>
-            <td>N/A</td>
-            <td></td>
             <td></td>
         </tr>
     </tbody>
