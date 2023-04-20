@@ -1,0 +1,52 @@
+category_name,label_text
+Enlarged Cardiomediastinum,increased width of the heart shadow
+Enlarged Cardiomediastinum,widened mediastinum
+Enlarged Cardiomediastinum,abnormal contour of the heart border
+Enlarged Cardiomediastinum,fluid or air within the pericardium
+Enlarged Cardiomediastinum,mass within the mediastinum
+Cardiomegaly,increased size of the heart shadow
+Cardiomegaly,enlargement of the heart silhouette
+Cardiomegaly,increased diameter of the heart border
+Cardiomegaly,increased cardiothoracic ratio
+Lung Lesion,consolidation of lung tissue
+Lung Lesion,pleural effusion
+Lung Lesion,cavities or abscesses in the lung
+Lung Lesion,abnormal opacity or shadow in the lung
+Lung Lesion,irregular or blurred margins of the lung
+Airspace Opacity,increased density in the lung field
+Airspace Opacity,whitish or grayish area in the lung field
+Airspace Opacity,obscured or blurred margins of the lung field
+Airspace Opacity,loss of normal lung markings within the opacity
+Airspace Opacity,air bronchograms within the opacity
+Airspace Opacity,fluid levels within the opacity
+Airspace Opacity,silhouette sign loss with adjacent structures
+Edema,blurry vascular markings in the lungs
+Edema,enlarged heart
+Edema,kerley b lines
+Edema,increased interstitial markings in the lungs
+Edema,widening of interstitial spaces
+Consolidation,loss of lung volume
+Consolidation,increased density of lung tissue
+Consolidation,obliteration of the diaphragmatic silhouette
+Consolidation,presence of opacities
+Atelectasis,increased opacity
+Atelectasis,volume loss of the affected lung region
+Atelectasis,blunting of the costophrenic angle
+Atelectasis,shifting of the mediastinum
+Pneumothorax,tracheal deviation
+Pneumothorax,deep sulcus sign
+Pneumothorax,increased radiolucency
+Pneumothorax,flattening of the hemidiaphragm
+Pneumothorax,absence of lung markings
+Pneumothorax,shifting of the mediastinum
+Pleural Effusion,blunting of costophrenic angles
+Pleural Effusion,opacity in the lower lung fields
+Pleural Effusion,mediastinal shift
+Pleural Effusion,reduced lung volume
+Pleural Effusion,presence of meniscus sign or veil-like appearance
+Support Devices,artificial joints or implants
+Support Devices,pacemakers or cardiac devices
+Support Devices,stents or other vascular devices
+Support Devices,prosthetic devices or limbs
+Support Devices,breast implants
+Support Devices,radiotherapy markers or seeds

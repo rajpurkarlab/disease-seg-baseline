@@ -11,7 +11,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('model', type=str, help='name of model (BioViL, )')
     parser.add_argument('validation_set', type=str, help='name of test set (CheXlocalize, )')
-    parser.add_argument('corpus_set', type=str, help='name of corpus set (MIMIC-CXR, MS-CXR, )')
+    parser.add_argument('corpus_set', type=str, help='name of corpus set (MIMIC-CXR, MS-CXR, Clinical-Baseline,)')
     return parser.parse_args()
 
 def main():
@@ -65,6 +65,40 @@ def main():
                         if tiou/count > best_ious[pathologies.index(pathology)]:
                             best_ious[pathologies.index(pathology)] = tiou/count
                             best_prompts[pathologies.index(pathology)] = text_prompt            
+        elif args.corpus_set == "Clinical-Baseline":
+            with open('datasets/Clinical-Baseline/prompts.csv', newline='') as csvfile:
+                reader = csv.reader(csvfile, delimiter=',')
+                for row in reader:
+                    if row[0] == pathology:
+                        text_prompt = row[1]
+
+                        if text_prompt in tried_prompts:
+                            continue
+                            
+                        print(text_prompt)
+
+                        tried_prompts.add(text_prompt)
+
+                        tiou = 0
+                        count = 0.0
+                         
+                        for obj in json_obj:
+                            filename = "datasets/CheXlocalize/CheXpert/val/" + obj.replace("_", "/", (obj.count('_')-1)) + ".jpg"
+
+                            annots = json_obj[obj][pathology]
+
+                            if annots['counts'] != 'ifdl3':
+                                gt_mask = mask_util.decode(annots)
+                                if gt_mask.max() == 0:
+                                    continue
+                                heatmap = ppgb(filename, text_prompt)
+                                iou, _, _ = compute_segmentation_metrics(heatmap, gt_mask)
+                                tiou += iou
+                                count += 1.0
+
+                        if tiou/count > best_ious[pathologies.index(pathology)]:
+                            best_ious[pathologies.index(pathology)] = tiou/count
+                            best_prompts[pathologies.index(pathology)] = text_prompt     
         else:
             raise NotImplementedError("Only MIMIC-CXR and MS-CXR are implemented for now")
 
