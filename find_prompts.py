@@ -17,7 +17,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    pathologies = ["Enlarged Cardiomediastinum", "Cardiomegaly", "Lung Lesion", "Airspace Opacity", "Edema", "Consolidation", "Atelectasis", "Pneumothorax", "Pleural Effusion", "Support Devices"]
+    pathologies = ["Cardiomegaly", "Edema", "Consolidation", "Atelectasis", "Pneumothorax", "Pleural Effusion"]
 
     best_ious = [0]*len(pathologies)
     best_prompts = ['']*len(pathologies)
@@ -66,7 +66,7 @@ def main():
                             best_ious[pathologies.index(pathology)] = tiou/count
                             best_prompts[pathologies.index(pathology)] = text_prompt            
         elif args.corpus_set == "Clinical-Baseline":
-            with open('datasets/Clinical-Baseline/prompts.csv', newline='') as csvfile:
+            with open('datasets/Clinical-Baseline/prompts_concat.csv', newline='') as csvfile:
                 reader = csv.reader(csvfile, delimiter=',')
                 for row in reader:
                     if row[0] == pathology:
@@ -74,10 +74,10 @@ def main():
 
                         if text_prompt in tried_prompts:
                             continue
-                            
-                        print(text_prompt)
 
                         tried_prompts.add(text_prompt)
+
+                        print(text_prompt)
 
                         tiou = 0
                         count = 0.0
@@ -88,9 +88,12 @@ def main():
                             annots = json_obj[obj][pathology]
 
                             if annots['counts'] != 'ifdl3':
+                                
                                 gt_mask = mask_util.decode(annots)
+
                                 if gt_mask.max() == 0:
                                     continue
+                                    
                                 heatmap = ppgb(filename, text_prompt)
                                 iou, _, _ = compute_segmentation_metrics(heatmap, gt_mask)
                                 tiou += iou
@@ -98,7 +101,7 @@ def main():
 
                         if tiou/count > best_ious[pathologies.index(pathology)]:
                             best_ious[pathologies.index(pathology)] = tiou/count
-                            best_prompts[pathologies.index(pathology)] = text_prompt     
+                            best_prompts[pathologies.index(pathology)] = text_prompt    
         else:
             raise NotImplementedError("Only MIMIC-CXR and MS-CXR are implemented for now")
 
@@ -106,6 +109,8 @@ def main():
     f.write(str(best_ious))
     f.write("\n")
     f.write(str(best_prompts))
+    # f.write("\n")
+    # f.write(str(counts))
     f.close()
         
 if __name__ == "__main__":
