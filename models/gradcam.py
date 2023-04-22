@@ -143,49 +143,29 @@ from models.BioViL.text.utils import get_cxr_bert_inference as get_bert_inferenc
 from models.BioViL.image.utils import get_biovil_resnet_inference as get_image_inference
 # from models.BioViL.image.utils import ImageModelType
 
-text_inference = get_bert_inference()
-image_inference = get_image_inference()
+def get_gradcam_map(image_path, image_caption):
+    text_inference = get_bert_inference()
+    image_inference = get_image_inference()
 
-# image_url = 'https://images2.minutemediacdn.com/image/upload/c_crop,h_706,w_1256,x_0,y_64/f_auto,q_auto,w_1100/v1554995050/shape/mentalfloss/516438-istock-637689912.jpg'
+    clip_model = "RN50"
+    saliency_layer = "layer4"
 
-image_caption = 'Edema'
-# image_caption = 'Cat'
+    blur = True
 
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
-clip_model = "RN50"
-saliency_layer = "layer4"
+    image_input = image_inference.transform(Image.open(image_path).convert('L')).unsqueeze(0).to(device)
+    image_np = load_image(image_path, 480)
+    # text_input = clip.tokenize([image_caption]).to(device)
 
-blur = True
+    attn_map = gradCAM(
+        image_inference.model.to(device), #.encoder.encoder,
+        image_input.to(device),
+        text_inference.get_embeddings_from_prompt(image_caption).float().to(device),
+        getattr(image_inference.model.encoder.encoder, saliency_layer)
+    )
+    attn_map = attn_map.squeeze().detach().cpu().numpy()
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-# model, preprocess = clip.load(clip_model, device=device, jit=False)
-# image_model = 
-# text_model = 
+    # viz_attn(image_np, attn_map, blur)
 
-
-image_path = 'datasets/CheXlocalize/CheXpert/test/patient64741/study1/view1_frontal.jpg'
-# image_path = 'image.png'
-
-
-# urllib.request.urlretrieve(image_url, image_path)
-
-# print(image_inference.transform)
-
-# preprocess = torchvision.transforms.Compose([
-#     torchvision.transforms.Resize(size=512, interpolation=torchvision.transforms.InterpolationMode.BILINEAR, max_size=None, antialias=None),
-#     torchvision.transforms.CenterCrop(size=(448, 448))]
-# )
-
-image_input = image_inference.transform(Image.open(image_path).convert('L')).unsqueeze(0).to(device)
-image_np = load_image(image_path, 480)
-# text_input = clip.tokenize([image_caption]).to(device)
-
-attn_map = gradCAM(
-    image_inference.model.to(device), #.encoder.encoder,
-    image_input.to(device),
-    text_inference.get_embeddings_from_prompt(image_caption).float().to(device),
-    getattr(image_inference.model.encoder.encoder, saliency_layer)
-)
-attn_map = attn_map.squeeze().detach().cpu().numpy()
-
-viz_attn(image_np, attn_map, blur)
+    return attn_map
