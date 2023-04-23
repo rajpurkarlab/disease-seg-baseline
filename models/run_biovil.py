@@ -6,7 +6,7 @@ from .BioViL.image import get_biovil_resnet_inference
 from .BioViL.vlp import ImageTextInferenceEngine
 from .BioViL.common.visualization import plot_phrase_grounding_similarity_map
 
-from run_biovil import get_gradcam_map
+from .gradcam import get_gradcam_map
 
 text_inference = get_cxr_bert_inference()
 image_inference = get_biovil_resnet_inference()
@@ -18,7 +18,7 @@ image_text_inference = ImageTextInferenceEngine(
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 image_text_inference.to(device)
 
-def plot_phrase_grounding(image_path: str, text_prompt: str, grad_cam: bool = False) -> None:
+def plot_phrase_grounding(image_path, text_prompt, grad_cam=False, input_size=None) -> None:
     if not grad_cam:
         similarity_map = image_text_inference.get_similarity_map_from_raw_data(
             image_path=Path(image_path),
@@ -26,5 +26,5 @@ def plot_phrase_grounding(image_path: str, text_prompt: str, grad_cam: bool = Fa
             interpolation="bilinear",
         )
     else:
-        similarity_map = get_gradcam_map(image_path, text_prompt)
+        similarity_map = get_gradcam_map(image_path, text_prompt, input_size)
     return similarity_map

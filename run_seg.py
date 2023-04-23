@@ -4,6 +4,7 @@ from pathlib import Path
 from uuid import uuid4
 import pycocotools.mask as mask_util
 import argparse
+import sys
 
 from utils import compute_segmentation_metrics, PATH_TO_ID
 from models.run_biovil import plot_phrase_grounding as ppgb
@@ -14,6 +15,7 @@ def parse_args():
     parser.add_argument('model', type=str, help='name of model (BioViL, )')
     parser.add_argument('test_set', type=str, help='name of test set (CheXlocalize, )')
     parser.add_argument('visualize', type=str, help='yes or no')
+    parser.add_argument('grad_cam', type=str, help='yes or no')
     return parser.parse_args()
 
 PROMPTS = {
@@ -31,6 +33,7 @@ PROMPTS = {
 
 def main():
     args = parse_args()
+    print(f"Running {sys.argv[0]} with args {args}")
 
     PLOT_IMAGES = False
     if args.visualize == "yes":
@@ -53,9 +56,13 @@ def main():
             annots = json_obj[obj][query]
 
             if annots['counts'] != 'ifdl3':
-                text_prompt = PROMPTS[query]
-                heatmap = ppgb(filename, text_prompt)
                 gt_mask = mask_util.decode(annots)
+                text_prompt = PROMPTS[query]
+                if args.grad_cam == "yes":
+                    heatmap = ppgb(filename, text_prompt, grad_cam=True, input_size=gt_mask.shape)
+                else:
+                    heatmap = ppgb(filename, text_prompt)
+                
                 best_iou, best_dice, best_thresh = compute_segmentation_metrics(heatmap, gt_mask)
                 
                 if PLOT_IMAGES:

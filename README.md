@@ -7,10 +7,10 @@
 After running `pip3 install -r requirements.txt`, run
 
 ```
-python3 run_seg.py [model] [test_set] [visualize]
+python3 run_seg.py [model] [test_set] [visualize] [grad_cam]
 ```
 
-where `model` is the name of the model to use (e.g, `BioViL`), `test_set` is the name of the test set to be used for evaluation (e.g, `CheXlocalize`), and visualize denotes whether or not to output plots of imags and masks (e.g., `yes` or `no`).
+where `model` is the name of the model to use (e.g, `BioViL`), `test_set` is the name of the test set to be used for evaluation (e.g, `CheXlocalize`), `visualize` denotes whether or not to output plots of imags and masks (e.g., `yes` or `no`), and `grad_cam` is whether or not to wrap `model` with Grad-CAM (`yes` or `no`).
 
 Example command:
 

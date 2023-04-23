@@ -1,18 +1,10 @@
-#!pip install ftfy regex tqdm matplotlib opencv-python scipy scikit-image
-#!pip install git+https://github.com/openai/CLIP.git
-
-import urllib.request
 import numpy as np
 import torch
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
-import clip
 from PIL import Image
 from scipy.ndimage import filters
 from torch import nn
-from torch.autograd import Variable
-import cv2
-
 
 def normalize(x: np.ndarray) -> np.ndarray:
     # Normalize to [0, 1].
@@ -22,17 +14,9 @@ def normalize(x: np.ndarray) -> np.ndarray:
     return x
 
 def getAttMap(img, attn_map, blur=True):
-    #resize image to (480,480)
-    # img = cv2.resize(img, (480,480))
-
-    # print(type(img))
     if blur:
         attn_map = filters.gaussian_filter(attn_map, 0.02*max(img.shape[:2]))
     attn_map = normalize(attn_map)
-    cmap = plt.get_cmap('jet')
-    attn_map_c = np.delete(cmap(attn_map), 3, 2)
-    attn_map = 1*(1-attn_map**0.7).reshape(attn_map.shape + (1,))*img + \
-            (attn_map**0.7).reshape(attn_map.shape+(1,)) * attn_map_c
     return attn_map
 
 def viz_attn(img, attn_map, blur=True):
@@ -76,10 +60,11 @@ class Hook:
         return self.data.grad
 
 def gradCAM(
-    model: nn.Module,
-    input: torch.Tensor,
-    target: torch.Tensor,
-    layer: nn.Module
+    model,
+    input,
+    target,
+    layer,
+    input_size
 ) -> torch.Tensor:
     
     # Zero out any gradients at the input.
@@ -95,16 +80,9 @@ def gradCAM(
     # Attach a hook to the model at the desired layer.
     assert isinstance(layer, nn.Module)
     with Hook(layer) as hook:        
-        # Do a forward and backward pass.
-        # output = model.get_patchwise_projected_embeddings(input, True, permute=False) #model(input)
+        # Do a forward and backward pass.        
         output = model(input).projected_patch_embeddings
-        print(output.shape)
         output = torch.flatten(torch.nn.functional.adaptive_avg_pool2d(output, (1, 1)), 1).squeeze(-1).squeeze(-1)
-        # output = Variable(output.data, requires_grad=True)
-        print("SHAPES=====")
-        print(output.shape, target.shape)
-        print("=====")
-
         output.backward(target)
 
         grad = hook.gradient.float()
@@ -121,10 +99,9 @@ def gradCAM(
         gradcam = torch.clamp(gradcam, min=0)
 
     # Resize gradcam to input resolution.
-    print(gradcam.shape, input.shape)
     gradcam = F.interpolate(
         gradcam,
-        input.shape[2:],
+        input_size, #input.shape[2:]
         mode='bicubic',
         align_corners=False)
     
@@ -134,38 +111,26 @@ def gradCAM(
         
     return gradcam
 
-# !pip install git+https://github.com/rvignav/hi-ml-multimodal.git
-
-import torch
-
 from models.BioViL.text.utils import get_cxr_bert_inference as get_bert_inference
-# from models.BioViL.text.utils import BertEncoderType
 from models.BioViL.image.utils import get_biovil_resnet_inference as get_image_inference
-# from models.BioViL.image.utils import ImageModelType
 
-def get_gradcam_map(image_path, image_caption):
+def get_gradcam_map(image_path, image_caption, input_size):
     text_inference = get_bert_inference()
     image_inference = get_image_inference()
 
-    clip_model = "RN50"
     saliency_layer = "layer4"
-
-    blur = True
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     image_input = image_inference.transform(Image.open(image_path).convert('L')).unsqueeze(0).to(device)
-    image_np = load_image(image_path, 480)
-    # text_input = clip.tokenize([image_caption]).to(device)
+    image_np = load_image(image_path, input_size[0])
 
     attn_map = gradCAM(
         image_inference.model.to(device), #.encoder.encoder,
         image_input.to(device),
         text_inference.get_embeddings_from_prompt(image_caption).float().to(device),
-        getattr(image_inference.model.encoder.encoder, saliency_layer)
+        getattr(image_inference.model.encoder.encoder, saliency_layer),
+        input_size
     )
     attn_map = attn_map.squeeze().detach().cpu().numpy()
-
-    # viz_attn(image_np, attn_map, blur)
-
-    return attn_map
+    return getAttMap(image_np, attn_map, blur=True)

@@ -2,6 +2,7 @@ import json
 import pycocotools.mask as mask_util
 import argparse
 import csv
+import sys
 
 from models.run_biovil import plot_phrase_grounding as ppgb
 from utils import compute_segmentation_metrics
@@ -16,6 +17,7 @@ def parse_args():
 
 def main():
     args = parse_args()
+    print(f"Running {sys.argv[0]} with args {args}")
 
     pathologies = ["Cardiomegaly", "Edema", "Consolidation", "Atelectasis", "Pneumothorax", "Pleural Effusion"]
 
@@ -56,11 +58,13 @@ def main():
                             annots = json_obj[obj][pathology]
 
                             if annots['counts'] != 'ifdl3':
+                                gt_mask = mask_util.decode(annots)
+
                                 if args.grad_cam == "yes":
-                                    heatmap = ppgb(filename, text_prompt, grad_cam=True)
+                                    heatmap = ppgb(filename, text_prompt, grad_cam=True, input_size=gt_mask.shape)
                                 else:
                                     heatmap = ppgb(filename, text_prompt)
-                                gt_mask = mask_util.decode(annots)
+                                
                                 iou, _, _ = compute_segmentation_metrics(heatmap, gt_mask)
                                 tiou += iou
                                 count += 1.0
@@ -94,13 +98,14 @@ def main():
                                 
                                 gt_mask = mask_util.decode(annots)
 
-                                if gt_mask.max() == 0:
+                                if (gt_mask.max() == 0):
                                     continue
-                                    
+
                                 if args.grad_cam == "yes":
-                                    heatmap = ppgb(filename, text_prompt, grad_cam=True)
+                                    heatmap = ppgb(filename, text_prompt, grad_cam=True, input_size=gt_mask.shape)
                                 else:
                                     heatmap = ppgb(filename, text_prompt)
+                                
                                 iou, _, _ = compute_segmentation_metrics(heatmap, gt_mask)
                                 tiou += iou
                                 count += 1.0
