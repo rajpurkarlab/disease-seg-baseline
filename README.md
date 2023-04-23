@@ -23,10 +23,10 @@ python3 run_seg.py BioViL CheXlocalize no
 Run
 
 ```
-python3 find_prompts.py [model] [validation_set] [corpus_set]
+python3 find_prompts.py [model] [validation_set] [corpus_set] [grad_cam]
 ```
 
-where `model` is the name of the model to use (e.g, `BioViL`), `validation_set` is the name of the validation set to be used (e.g., `CheXlocalize`), and corpus set is the set of all report phrases to search over (e.g, `MIMIC-CXR` or `MS-CXR`).
+where `model` is the name of the model to use (e.g, `BioViL`), `validation_set` is the name of the validation set to be used (e.g., `CheXlocalize`), `corpus_set` is the set of all report phrases to search over (e.g, `MIMIC-CXR` or `MS-CXR`), and `grad_cam` is whether or not to wrap `model` with Grad-CAM (`yes` or `no`).
 
 Example command:
 
@@ -35,6 +35,8 @@ python3 find_prompts.py BioViL CheXlocalize MS-CXR
 ```
 
 ## Results Leaderboard
+
+### TODO (vramesh): Update leaderboard
 
 <table>
     <thead>

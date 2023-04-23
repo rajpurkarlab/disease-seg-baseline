@@ -4,14 +4,14 @@ import argparse
 import csv
 
 from models.run_biovil import plot_phrase_grounding as ppgb
-from models.BioViL.image.data.io import load_image
-from utils import compute_segmentation_metrics, read_prompts
+from utils import compute_segmentation_metrics
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('model', type=str, help='name of model (BioViL, )')
     parser.add_argument('validation_set', type=str, help='name of test set (CheXlocalize, )')
     parser.add_argument('corpus_set', type=str, help='name of corpus set (MIMIC-CXR, MS-CXR, Clinical-Baseline,)')
+    parser.add_argument('grad_cam', type=str, help='whether or not to wrap BioViL with GradCAM (yes, no)')
     return parser.parse_args()
 
 def main():
@@ -56,7 +56,10 @@ def main():
                             annots = json_obj[obj][pathology]
 
                             if annots['counts'] != 'ifdl3':
-                                heatmap = ppgb(filename, text_prompt)
+                                if args.grad_cam == "yes":
+                                    heatmap = ppgb(filename, text_prompt, grad_cam=True)
+                                else:
+                                    heatmap = ppgb(filename, text_prompt)
                                 gt_mask = mask_util.decode(annots)
                                 iou, _, _ = compute_segmentation_metrics(heatmap, gt_mask)
                                 tiou += iou
@@ -66,7 +69,7 @@ def main():
                             best_ious[pathologies.index(pathology)] = tiou/count
                             best_prompts[pathologies.index(pathology)] = text_prompt            
         elif args.corpus_set == "Clinical-Baseline":
-            with open('datasets/Clinical-Baseline/prompts_concat.csv', newline='') as csvfile:
+            with open('datasets/Clinical-Baseline/prompts.csv', newline='') as csvfile:
                 reader = csv.reader(csvfile, delimiter=',')
                 for row in reader:
                     if row[0] == pathology:
@@ -94,7 +97,10 @@ def main():
                                 if gt_mask.max() == 0:
                                     continue
                                     
-                                heatmap = ppgb(filename, text_prompt)
+                                if args.grad_cam == "yes":
+                                    heatmap = ppgb(filename, text_prompt, grad_cam=True)
+                                else:
+                                    heatmap = ppgb(filename, text_prompt)
                                 iou, _, _ = compute_segmentation_metrics(heatmap, gt_mask)
                                 tiou += iou
                                 count += 1.0
@@ -109,8 +115,6 @@ def main():
     f.write(str(best_ious))
     f.write("\n")
     f.write(str(best_prompts))
-    # f.write("\n")
-    # f.write(str(counts))
     f.close()
         
 if __name__ == "__main__":
