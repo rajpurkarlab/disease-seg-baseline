@@ -105,7 +105,7 @@ def main():
         else:
             raise NotImplementedError("Only MIMIC-CXR and MS-CXR are implemented for now")
 
-    f = open("results.txt", "a")
+    f = open(f"results_{args.corpus_set}.txt", "a")
     f.write(str(best_ious))
     f.write("\n")
     f.write(str(best_prompts))
