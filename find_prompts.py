@@ -71,7 +71,10 @@ def main():
 
                         if tiou/count > best_ious[pathologies.index(pathology)]:
                             best_ious[pathologies.index(pathology)] = tiou/count
-                            best_prompts[pathologies.index(pathology)] = text_prompt            
+                            best_prompts[pathologies.index(pathology)] = text_prompt
+            print(f"\n{pathology}\n")
+            print(f"IoU: {best_ious[pathologies.index(pathology)]}")
+            print(f"Optimal Prompt: {best_prompts[pathologies.index(pathology)]}")
         elif args.corpus_set == "Clinical-Baseline":
             with open('datasets/Clinical-Baseline/prompts.csv', newline='') as csvfile:
                 reader = csv.reader(csvfile, delimiter=',')
