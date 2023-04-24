@@ -12,7 +12,7 @@ def parse_args():
     parser.add_argument('model', type=str, help='name of model (BioViL, )')
     parser.add_argument('validation_set', type=str, help='name of test set (CheXlocalize, )')
     parser.add_argument('corpus_set', type=str, help='name of corpus set (MIMIC-CXR, MS-CXR, Clinical-Baseline,)')
-    parser.add_argument('grad_cam', type=str, help='whether or not to wrap BioViL with GradCAM (yes, no)')
+    parser.add_argument('method', type=str, help='how to generate heatmap (naive, grad_cam, gradcam_plus, cocoa)')
     return parser.parse_args()
 
 def main():
@@ -59,11 +59,12 @@ def main():
 
                             if annots['counts'] != 'ifdl3':
                                 gt_mask = mask_util.decode(annots)
-
-                                if args.grad_cam == "yes":
-                                    heatmap = ppgb(filename, text_prompt, grad_cam=True, input_size=gt_mask.shape)
-                                else:
+                                if gt_mask.max() == 0:
+                                    continue
+                                if args.method == "naive":
                                     heatmap = ppgb(filename, text_prompt)
+                                else:
+                                    heatmap = ppgb(filename, text_prompt, method=args.method, input_size=gt_mask.shape, pathology=pathology)
                                 
                                 iou, _, _ = compute_segmentation_metrics(heatmap, gt_mask)
                                 tiou += iou
@@ -72,9 +73,6 @@ def main():
                         if tiou/count > best_ious[pathologies.index(pathology)]:
                             best_ious[pathologies.index(pathology)] = tiou/count
                             best_prompts[pathologies.index(pathology)] = text_prompt
-            print(f"\n{pathology}\n")
-            print(f"IoU: {best_ious[pathologies.index(pathology)]}")
-            print(f"Optimal Prompt: {best_prompts[pathologies.index(pathology)]}")
         elif args.corpus_set == "Clinical-Baseline":
             with open('datasets/Clinical-Baseline/prompts.csv', newline='') as csvfile:
                 reader = csv.reader(csvfile, delimiter=',')
@@ -104,10 +102,10 @@ def main():
                                 if (gt_mask.max() == 0):
                                     continue
 
-                                if args.grad_cam == "yes":
-                                    heatmap = ppgb(filename, text_prompt, grad_cam=True, input_size=gt_mask.shape)
-                                else:
+                                if args.method == "naive":
                                     heatmap = ppgb(filename, text_prompt)
+                                else:
+                                    heatmap = ppgb(filename, text_prompt, method=args.method, input_size=gt_mask.shape, pathology=pathology)
                                 
                                 iou, _, _ = compute_segmentation_metrics(heatmap, gt_mask)
                                 tiou += iou
@@ -118,6 +116,9 @@ def main():
                             best_prompts[pathologies.index(pathology)] = text_prompt    
         else:
             raise NotImplementedError("Only MIMIC-CXR and MS-CXR are implemented for now")
+        print(f"\n{pathology}")
+        print(f"IoU: {best_ious[pathologies.index(pathology)]}")
+        print(f"Optimal Prompt: {best_prompts[pathologies.index(pathology)]}")
 
     f = open(f"results_{args.corpus_set}.txt", "a")
     f.write(str(best_ious))

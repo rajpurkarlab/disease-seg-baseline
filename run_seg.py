@@ -15,7 +15,7 @@ def parse_args():
     parser.add_argument('model', type=str, help='name of model (BioViL, )')
     parser.add_argument('test_set', type=str, help='name of test set (CheXlocalize, )')
     parser.add_argument('visualize', type=str, help='yes or no')
-    parser.add_argument('grad_cam', type=str, help='yes or no')
+    parser.add_argument('method', type=str, help='how to generate heatmap (naive, grad_cam, gradcam_plus, cocoa)')
     return parser.parse_args()
 
 PROMPTS = {
@@ -57,11 +57,13 @@ def main():
 
             if annots['counts'] != 'ifdl3':
                 gt_mask = mask_util.decode(annots)
+                if gt_mask.max() == 0:
+                    continue
                 text_prompt = PROMPTS[query]
-                if args.grad_cam == "yes":
-                    heatmap = ppgb(filename, text_prompt, grad_cam=True, input_size=gt_mask.shape)
-                else:
+                if args.method == "naive":
                     heatmap = ppgb(filename, text_prompt)
+                else:
+                    heatmap = ppgb(filename, text_prompt, method=args.method, input_size=gt_mask.shape, pathology=query)
                 
                 best_iou, best_dice, best_thresh = compute_segmentation_metrics(heatmap, gt_mask)
                 

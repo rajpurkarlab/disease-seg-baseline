@@ -7,15 +7,15 @@
 After running `pip3 install -r requirements.txt`, run
 
 ```
-python3 run_seg.py [model] [test_set] [visualize] [grad_cam]
+python3 run_seg.py [model] [test_set] [visualize] [method]
 ```
 
-where `model` is the name of the model to use (e.g, `BioViL`), `test_set` is the name of the test set to be used for evaluation (e.g, `CheXlocalize`), `visualize` denotes whether or not to output plots of imags and masks (e.g., `yes` or `no`), and `grad_cam` is whether or not to wrap `model` with Grad-CAM (`yes` or `no`).
+where `model` is the name of the model to use (e.g, `BioViL`), `test_set` is the name of the test set to be used for evaluation (e.g, `CheXlocalize`), `visualize` denotes whether or not to output plots of imags and masks (e.g., `yes` or `no`), and `method` is what phrase grounding method to use (`naive`, `grad_cam`, `cocoa`).
 
 Example command:
 
 ```
-python3 run_seg.py BioViL CheXlocalize no
+python3 run_seg.py BioViL CheXlocalize no grad_cam
 ```
 
 ### Finding Best Prompts
@@ -23,17 +23,18 @@ python3 run_seg.py BioViL CheXlocalize no
 Run
 
 ```
-python3 find_prompts.py [model] [validation_set] [corpus_set] [grad_cam]
+python3 find_prompts.py [model] [validation_set] [corpus_set] [method]
 ```
 
-where `model` is the name of the model to use (e.g, `BioViL`), `validation_set` is the name of the validation set to be used (e.g., `CheXlocalize`), `corpus_set` is the set of all report phrases to search over (e.g, `MIMIC-CXR` or `MS-CXR`), and `grad_cam` is whether or not to wrap `model` with Grad-CAM (`yes` or `no`).
+where `model` is the name of the model to use (e.g, `BioViL`), `validation_set` is the name of the validation set to be used (e.g., `CheXlocalize`), `corpus_set` is the set of all report phrases to search over (e.g, `MIMIC-CXR` or `MS-CXR`), and `method` is what phrase grounding method to use (`naive`, `grad_cam`, `cocoa`).
 
 Example command:
 
 ```
-python3 find_prompts.py BioViL CheXlocalize MS-CXR
+python3 find_prompts.py BioViL CheXlocalize MS-CXR naive
 ```
 
+<!--
 ## Results Leaderboard
 
 ### TODO (vramesh): Update leaderboard
@@ -98,4 +99,4 @@ python3 find_prompts.py BioViL CheXlocalize MS-CXR
             <td></td>
         </tr>
     </tbody>
-</table>
+</table> -->

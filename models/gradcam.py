@@ -64,7 +64,8 @@ def gradCAM(
     input,
     target,
     layer,
-    input_size
+    input_size,
+    gradcam_plus
 ) -> torch.Tensor:
     
     # Zero out any gradients at the input.
@@ -96,7 +97,8 @@ def gradCAM(
         gradcam = torch.sum(act * alpha, dim=1, keepdim=True)
         # We only want neurons with positive influence so we
         # clamp any negative ones.
-        gradcam = torch.clamp(gradcam, min=0)
+        if gradcam_plus:
+            gradcam = torch.clamp(gradcam, min=0)
 
     # Resize gradcam to input resolution.
     gradcam = F.interpolate(
@@ -114,7 +116,7 @@ def gradCAM(
 from models.BioViL.text.utils import get_cxr_bert_inference as get_bert_inference
 from models.BioViL.image.utils import get_biovil_resnet_inference as get_image_inference
 
-def get_gradcam_map(image_path, image_caption, input_size):
+def get_gradcam_map(image_path, image_caption, input_size, gradcam_plus):
     text_inference = get_bert_inference()
     image_inference = get_image_inference()
 
@@ -130,7 +132,8 @@ def get_gradcam_map(image_path, image_caption, input_size):
         image_input.to(device),
         text_inference.get_embeddings_from_prompt(image_caption).float().to(device),
         getattr(image_inference.model.encoder.encoder, saliency_layer),
-        input_size
+        input_size,
+        gradcam_plus
     )
     attn_map = attn_map.squeeze().detach().cpu().numpy()
     return getAttMap(image_np, attn_map, blur=True)
