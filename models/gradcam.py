@@ -136,4 +136,15 @@ def get_gradcam_map(image_path, image_caption, input_size, gradcam_plus):
         gradcam_plus
     )
     attn_map = attn_map.squeeze().detach().cpu().numpy()
-    return getAttMap(image_np, attn_map, blur=True)
+    map = getAttMap(image_np, attn_map, blur=True)
+    if gradcam_plus:
+        return map
+    else:
+        # invert map if most pixels are 0, else keep it same
+        # print(map)
+        # print(map.max(), map.min(), np.mean(map))
+        map = (map > (map.min() + map.max())/2).astype(int)
+        if np.mean(map) < 0.5:
+            return map
+        else:
+            return 1 - map
