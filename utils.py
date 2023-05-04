@@ -19,16 +19,16 @@ def compute_segmentation_metrics(heatmap, gt_mask):
     return best_iou, best_dice, best_thresh
 
 PATH_TO_ID = {
-    "Enlarged Cardiomediastinum": 0,
-    "Cardiomegaly": 1,
-    "Lung Lesion": 2,
-    "Airspace Opacity": 3,
-    "Edema": 4,
-    "Consolidation": 5,
-    "Atelectasis": 6,
-    "Pneumothorax": 7,
-    "Pleural Effusion": 8,
-    "Support Devices": 9
+    # "Enlarged Cardiomediastinum": 0,
+    "Cardiomegaly": 0,
+    # "Lung Lesion": 2,
+    # "Airspace Opacity": 3,
+    "Edema": 1,
+    "Consolidation": 2,
+    "Atelectasis": 3,
+    "Pneumothorax": 4,
+    "Pleural Effusion": 5,
+    # "Support Devices": 9
 }
 
 def read_prompts(filename):

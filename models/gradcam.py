@@ -116,7 +116,14 @@ def gradCAM(
 from models.BioViL.text.utils import get_cxr_bert_inference as get_bert_inference
 from models.BioViL.image.utils import get_biovil_resnet_inference as get_image_inference
 
-def get_gradcam_map(image_path, image_caption, input_size, gradcam_plus):
+import numpy as np
+import torch
+import matplotlib.pyplot as plt
+import torchxrayvision as xrv
+
+model = xrv.baseline_models.chestx_det.PSPNet()
+
+def get_gradcam_map(image_path, image_caption, input_size, gradcam_plus, seg_targets):
     text_inference = get_bert_inference()
     image_inference = get_image_inference()
 
@@ -124,7 +131,48 @@ def get_gradcam_map(image_path, image_caption, input_size, gradcam_plus):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    image_input = image_inference.transform(Image.open(image_path).convert('L')).unsqueeze(0).to(device)
+    idxs = {
+        "Left Lung": 4,
+        "Right Lung": 5,
+        "Heart": 8,
+        "Facies Diaphragmatica": 10,
+    }
+
+    img = Image.open(image_path).convert('L')
+    oimg = np.array(img)
+    img = xrv.datasets.normalize(oimg, 255)
+    img = torch.from_numpy(img)
+
+    origimg = np.array(Image.open(image_path).convert('L'))
+
+    if len(seg_targets) > 0:
+        with torch.no_grad():
+            pred = model(img)
+        pred = 1 / (1 + np.exp(-pred))  # sigmoid
+        pred[pred < 0.5] = 0
+        pred[pred > 0.5] = 1
+
+        preds = []
+
+        for p in seg_targets:
+            preds.append(np.array(Image.fromarray(pred[0, idxs[p]].numpy()).resize((input_size[1], input_size[0]), Image.BILINEAR)))
+        
+        # print(input_size, origimg.shape, preds[0].shape)
+
+        for i in range(oimg.shape[0]):
+            for j in range(oimg.shape[1]):
+                not_in_either = True
+                counter = 0
+                for p in seg_targets:
+                    predi = preds[counter]
+                    counter += 1
+                    
+                    if predi[i, j] == 1:
+                        not_in_either = False
+                if not_in_either:
+                    origimg[i, j] *= 0.7
+        
+    image_input = image_inference.transform(Image.fromarray(origimg)).unsqueeze(0).to(device)
     image_np = load_image(image_path, input_size[0])
 
     attn_map = gradCAM(
@@ -138,13 +186,11 @@ def get_gradcam_map(image_path, image_caption, input_size, gradcam_plus):
     attn_map = attn_map.squeeze().detach().cpu().numpy()
     map = getAttMap(image_np, attn_map, blur=True)
     if gradcam_plus:
-        return map
+        return map,origimg
     else:
         # invert map if most pixels are 0, else keep it same
-        # print(map)
-        # print(map.max(), map.min(), np.mean(map))
         map = (map > (map.min() + map.max())/2).astype(int)
         if np.mean(map) < 0.5:
-            return map
+            return map, origimg
         else:
-            return 1 - map
+            return 1 - map, origimg

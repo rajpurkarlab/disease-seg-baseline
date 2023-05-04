@@ -19,7 +19,7 @@ image_text_inference = ImageTextInferenceEngine(
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 image_text_inference.to(device)
 
-def plot_phrase_grounding(image_path, text_prompt, method="naive", input_size=None, pathology=None) -> None:
+def plot_phrase_grounding(image_path, text_prompt, method="naive", input_size=None, pathology=None, seg_targets=None) -> None:
     if method == "naive":
         similarity_map = image_text_inference.get_similarity_map_from_raw_data(
             image_path=Path(image_path),
@@ -27,9 +27,9 @@ def plot_phrase_grounding(image_path, text_prompt, method="naive", input_size=No
             interpolation="bilinear",
         )
     elif method == "grad_cam":
-        similarity_map = get_gradcam_map(image_path, text_prompt, input_size, False)
+        similarity_map, img = get_gradcam_map(image_path, text_prompt, input_size, False, seg_targets)
     elif method == "gradcam_plus":
-        similarity_map = get_gradcam_map(image_path, text_prompt, input_size, True)
+        similarity_map, img = get_gradcam_map(image_path, text_prompt, input_size, True, seg_targets)
     else:
         d = {
             "Enlarged Cardiomediastinum": "Findings suggesting enlarged cardiomediastinum",
@@ -45,4 +45,4 @@ def plot_phrase_grounding(image_path, text_prompt, method="naive", input_size=No
         }
         foil_captions = list(set(list(d.keys())) - set([d[pathology]]))
         similarity_map = get_cocoa_map(image_path, text_prompt, foil_captions, input_size)
-    return similarity_map
+    return similarity_map, img

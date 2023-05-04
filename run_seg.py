@@ -19,16 +19,21 @@ def parse_args():
     return parser.parse_args()
 
 PROMPTS = {
-    "Enlarged Cardiomediastinum": "Findings suggesting enlarged cardiomediastinum",
     "Cardiomegaly": "Findings suggesting cardiomegaly", 
-    "Lung Lesion": "Fundings suggesting lung lesions", 
-    "Airspace Opacity": "Findings suggesting airspace opacities",
     "Edema": "Findings suggesting an edema",
     "Consolidation": "Findings suggesting consolidation",
     "Atelectasis": "Findings suggesting atelectasis",
     "Pneumothorax": "Findings suggesting a pneumothorax",
     "Pleural Effusion": "Findings suggesting pleural effusion", 
-    "Support Devices": "Findings suggesting support devices" # TODO: change this?
+}
+
+SEG_TARGETS = {
+    "Cardiomegaly": ["Heart"], 
+    "Edema": ["Left Lung", "Right Lung"],
+    "Consolidation": ["Left Lung", "Right Lung"],
+    "Atelectasis": ["Left Lung", "Right Lung", "Facies Diaphragmatica"],
+    "Pneumothorax": [],
+    "Pleural Effusion": ["Left Lung", "Right Lung", "Facies Diaphragmatica"], 
 }
 
 def main():
@@ -50,26 +55,35 @@ def main():
 
     json_obj = json.load(open("datasets/CheXlocalize/gt_segmentations_test.json"))
 
+    c = 0
+
     for obj in json_obj:
         filename = "datasets/CheXlocalize/CheXpert/test/" + obj.replace("_", "/", (obj.count('_')-1)) + ".jpg"
         for query in json_obj[obj]:
+            if query not in PROMPTS:
+                continue
             annots = json_obj[obj][query]
 
             if annots['counts'] != 'ifdl3':
                 gt_mask = mask_util.decode(annots)
                 if gt_mask.max() == 0:
                     continue
+                
+                c += 1
+                if c != 4:
+                    continue
+                
                 text_prompt = PROMPTS[query]
                 if args.method == "naive":
                     heatmap = ppgb(filename, text_prompt)
                 else:
-                    heatmap = ppgb(filename, text_prompt, method=args.method, input_size=gt_mask.shape, pathology=query)
+                    heatmap, image = ppgb(filename, text_prompt, method=args.method, input_size=gt_mask.shape, pathology=query, seg_targets=SEG_TARGETS[query])
                 
                 best_iou, best_dice, best_thresh = compute_segmentation_metrics(heatmap, gt_mask)
                 
                 if PLOT_IMAGES:
                     _, axes = plt.subplots(1, 3, figsize=(15, 6))
-                    image = load_image(Path(filename)).convert("RGB")
+                    # image = load_image(Path(filename)).convert("RGB")
                     axes[0].imshow(image)
                     axes[0].axis('off')
                     axes[0].set_title("Input image")
